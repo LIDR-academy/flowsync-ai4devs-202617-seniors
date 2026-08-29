@@ -1,112 +1,132 @@
 # FlowSync
 
-Proyecto de práctica del curso: gestión de tareas en equipo. API en AdonisJS (`backend/`) + frontend en React + Vite (`frontend/`).
+Gestión de tareas en equipo. Monorepo con **AdonisJS 7 + SQLite** en `backend/` y **React 19 + Vite** en `frontend/`.
 
-## Empezar
+Este es el proyecto sobre el que trabajas en el Módulo 3. Léelo entero antes de empezar: además de cómo levantarlo, aquí está **el ejercicio y cómo se entrega**.
 
-Trabajas sobre **tu fork**, no sobre el repositorio del curso: aquí vas a crear una rama, commitear y abrir un pull request, y sobre un clon directo no tienes permiso de escritura.
+## Arrancarlo
 
-Si ya tienes tu fork de un módulo anterior, con el remoto `upstream` apuntando al repositorio del curso, basta con traer la rama nueva:
-
-```bash
-git fetch upstream
-git checkout -b s2/start upstream/s2/start
-git push -u origin s2/start
-```
-
-Si empiezas de cero:
+No hay `package.json` en la raíz. Los comandos de `npm` se ejecutan dentro de `backend/` y de `frontend/`, y el `Makefile` de la raíz ya lo hace por ti.
 
 ```bash
-# 1. Fork desde la web: botón "Fork" en github.com/LIDR-academy/flowsync-ai4devs
-
-# 2. Clona TU fork y añade el del curso como "upstream"
-git clone git@github.com:<tu-usuario>/flowsync-ai4devs.git
-cd flowsync-ai4devs
-git remote add upstream git@github.com:LIDR-academy/flowsync-ai4devs.git
-git remote -v          # origin = tu fork, upstream = el del curso
-
-# 3. Colócate en la rama de partida
-git fetch upstream
-git checkout -b s2/start upstream/s2/start
-git push -u origin s2/start
-```
-
-> Si te sale `Permission denied (publickey)`, es SSH y no el fork. O subes una clave a tu cuenta de GitHub, o cambias las dos URLs por su versión HTTPS. Si el `clone` falla por otra cosa, avisa a tu TA.
-
-## Arrancar la app
-
-El repositorio trae un `Makefile` con los atajos de desarrollo. Con dos comandos tienes todo en marcha:
-
-```bash
-make setup   # solo la primera vez: instala deps, crea los .env y migra
+make setup   # solo la primera vez: instala deps, crea los .env, genera la APP_KEY y migra
 make start   # levanta backend (:3333) y frontend (:5173) a la vez
+make help    # lista todos los targets
 ```
 
-`make start` arranca los dos servidores juntos; `Ctrl-C` los para. `make help` lista todos los targets. Si ya hiciste el `setup` antes, con `make start` basta.
+`make start` arranca los dos servidores juntos; `Ctrl-C` los para, y si uno se cae se lleva al otro por delante. El frontend apunta al backend por defecto; para cambiarlo, ajusta `VITE_API_URL` en `frontend/.env`.
 
-- Backend en `http://localhost:3333`.
-- Frontend en `http://localhost:5173`. Apunta al backend por defecto; para cambiarlo, ajusta `VITE_API_URL` en `frontend/.env`.
+> Requisitos: Node.js 20.19+ (lo pide OpenSpec, que instalas en el prework) y GNU Make. En Windows, desde WSL y con el repo clonado dentro del sistema de ficheros de Linux.
 
-> Necesitas Node.js, npm y GNU Make. En macOS `make` viene con las Command Line Tools de Xcode; en Linux o WSL, `sudo apt install make` o el equivalente de tu distribución. Windows sin WSL no está soportado.
+## Qué hay ya construido
+
+- **El vertical de cuentas y acceso, de punta a punta**: registro, inicio de sesión, sesión y perfil, con su API y sus pantallas. Es la superficie del ejercicio.
+- **El PRD y el backlog del equipo**, en `docs/`. No los necesitas para el ejercicio; los usa el directo.
+- **La capa de agente** de la raíz (`CLAUDE.md`, `AGENTS.md`, `.claude/`, `.mcp.json`), que es parte del material y no un accesorio.
 
 ---
 
 # El ejercicio
 
-**Recorta un MVP hasta que puedas defenderlo.** Unos 45 minutos, con el reloj puesto, antes del directo.
+**Se hace antes del directo.** Son unos 45 minutos y hay que ponerles un reloj.
 
-El enunciado completo, con su formato y sus tres líneas de cierre, está en la lección **"Tu turno"** del Módulo 2. Esto es el resumen operativo.
+## Cómo funciona este módulo
 
-Partes de este párrafo vago, del tipo que llega de verdad:
+Tres momentos, y conviene que los sepas antes de empezar:
 
-> «Quiero una herramienta para que los equipos remotos sepan en qué está trabajando cada uno sin tener que hacer reuniones de sincronización. Algo tipo tareas compartidas pero más en tiempo real y menos rollo que Jira.»
+1. **Lo intentas tú**, aquí, sobre este proyecto. Entregas lo que te salga, con lo que tenga.
+2. **Lo ves resuelto en el directo.** El mentor hace este mismo ejercicio sobre este mismo proyecto y sobre la misma superficie. Si no te salió, ahí ves que se puede y cómo.
+3. **Lo replicas después**, con los prompts del mentor, que te llegan por escrito.
 
-## Parte A: el alcance, con reloj
+Por eso la entrega a medias no es un problema: **el paso 1 no se puntúa por completarlo**. Y por eso conviene mirar el directo sin teclear, porque lo vas a repetir con calma luego.
 
-Cuatro tramos, en este orden, en un solo archivo versionado:
+> ⚠️ **En el paso 3 no esperes salidas idénticas.** El agente no es determinista: con el mismo prompt y el mismo código cambian la redacción, el orden y hasta cuántos requisitos escribe. Lo que se repite es **la forma**, no el texto.
 
-1. **El terreno que ya existe (3-5 líneas).** El proyecto no es una carpeta vacía. Que el agente te devuelva qué hay construido y qué no, antes de especificar nada.
+## Parte A: la spec, con reloj
 
-2. **El interrogatorio.** Que la IA **pregunte antes de proponer**, sobre el problema, los usuarios y el alcance. Respondes tú, decidiendo. Acótala a **una sola ronda** y prohíbele bajar al modelo de datos o a los endpoints.
+Con un agente, escribe **la spec de lo que el sistema hace hoy** en el vertical de cuentas y acceso, y déjala en `docs/spec-viva/<tus-iniciales>.md`, no en el chat. La carpeta no existe todavía: la crea tu archivo.
 
-3. **El alcance en cinco bloques.** Problema · usuarios · propuesta de valor · alcance · **NO-alcance**. Que sea agresiva recortando y que **justifique cada exclusión**. Después recorta tú otra vez.
+**Una sola mitad.** Esa superficie tiene dos capas: lo que pasa por la API y lo que se ve en pantalla. **Elige una, no las dos.** Cabe hacer las dos; lo que no cabe es comprobarlas después, que es donde está el ejercicio.
 
-4. **Los requisitos y las métricas.** Qué tiene que poder hacer alguien, numerado y en lenguaje de producto, más cómo sabrás si funcionó.
+**Para esto no necesitas OpenSpec, y no lo inicialices aquí.** No se lanza ningún comando: se lee el código que ya está en el repo y se escribe un archivo de texto con el formato de una spec viva. El `openspec init` sobre este proyecto llega en el directo.
 
-> Un documento de producto **no lleva tablas, ni endpoints, ni arquitectura**. Si lo ves crecer hacia ahí, súbelo de nivel y anótalo: es el hallazgo más útil del rato.
->
-> Cuando suene el reloj, para. Un bloque a medias es información; uno rellenado de memoria, no.
+**El formato no es negociable:**
 
-## Parte B: las tres líneas
+- Arriba, un `## Purpose` de una o dos frases: para qué existe esta capability.
+- Debajo, `## Requirements`, y colgando de él `### Requirement:` en los que el sistema **SHALL** hacer algo.
+- Bajo cada requisito, al menos un `#### Scenario:` de cuatro almohadillas, con dos viñetas: `- **WHEN**` y `- **THEN**`. No hay casilla para el `GIVEN`: la precondición va dentro del `WHEN`.
+- En castellano, salvo las mayúsculas de la RFC.
 
-Debajo del alcance, en el mismo archivo. **Esta parte no se puede fallar.**
+**Y tres reglas duras:**
 
-1. Los dos números: cuántas cosas propuso la IA meter dentro, y cuántas quedaron después de tu recorte.
-2. Tres cosas que dejaste fuera y por qué cada una, en la forma *"esto fuera, porque no ayuda a validar que…"*. *"No da tiempo"* no vale.
-3. La exclusión de la que menos seguro estás, y qué tendría que pasar para que entrara.
+1. **Nada de `ADDED`, `MODIFIED` ni `REMOVED`.** Eso es el vocabulario de un delta, y esto no es un delta: es la verdad actual del sistema.
+2. **Solo comportamiento observable desde fuera.** Ni un nombre de clase, ni un nombre de archivo, ni una ruta de código. Si vas por la API, observable es la petición y la respuesta. Si vas por la pantalla, observable es lo que una persona ve y puede hacer.
+3. **No toques el código.** Ni siquiera para arreglar lo que encuentres, y sobre todo para eso: lo que encuentres es material de la parte B.
+
+> ⚠️ **Cuando suene el reloj, para. Aunque esté a medias.** Una spec en la que comprobaste seis de los requisitos que escribiste y dejaste dos a medias **es información**: dice hasta dónde llegaste. Una spec completada de memoria diez minutos después es ruido con formato, y encima es indistinguible de la buena.
+
+## Parte B: las tres listas
+
+Debajo de la spec, en el mismo archivo. **Esta parte no se puede fallar**, y es la que hay que traer sí o sí.
+
+1. **Cuántos requisitos escribió el agente, y cuántos comprobaste tú abriendo el código.** Los dos números, tal cual salieron. Comprobar significa haber ido a mirar; leer el requisito y que suene razonable no cuenta.
+2. **Las incoherencias que aparecieron al escribirla**, una línea cada una y con dónde se ve.
+3. **Lo que no supiste decidir si era un bug o el contrato**, y en una frase, qué dos lecturas se contradecían. Esta es la que importa.
 
 ---
 
 # Cómo se entrega
 
-**Un pull request desde tu fork**, con dos cosas dentro y ni una más:
+**Es un pull request desde tu fork.** Cinco pasos.
 
-1. **Tu archivo de alcance**, en `docs/prd/alcance-mvp-<tus-iniciales>.md`. Ese directorio no existe todavía: créalo.
-2. **`prompts.md`**, en la raíz. Ya está aquí con la plantilla puesta: cada prompt en su bloque de código, tal cual lo lanzaste, con su modelo y su herramienta. Incluye también los que no funcionaron.
+### 1. Forkea este repositorio
+
+Con el botón **Fork** de arriba. Sobre un clon directo no tienes permiso de escritura, y aquí vas a crear una rama y commitear.
 
 ```bash
-git checkout -b alcance-<tus-iniciales>
-git add docs/prd prompts.md
-git commit -m "alcance: MVP mas prompts"
-git push -u origin alcance-<tus-iniciales>
+git clone git@github.com:<tu-usuario>/flowsync-ai4devs.git
+cd flowsync-ai4devs
+git remote add upstream git@github.com:LIDR-academy/flowsync-ai4devs.git
+git fetch upstream
+git checkout -b s3/start upstream/s3/start
 ```
 
-Con la rama empujada, GitHub te ofrece el botón para abrir el pull request. Va **contra el repositorio del curso**, no contra tu fork.
+> 📌 Si te sale `Permission denied (publickey)`, es SSH y no el fork. La guía oficial está en `docs.github.com/es/authentication/connecting-to-github-with-ssh`.
 
-**Plazo: antes del directo.** Lo que llegue a tiempo lo revisa tu TA antes de la sesión, que es el único momento en que ese feedback te sirve. Lo que llegue después se marca como recibido, pero ya no se revisa.
+### 2. Crea tu rama
 
-> Entrégalo con lo que tenga, sin maquillarlo: lo que le falta es la mitad de lo interesante.
+```bash
+git checkout -b spec-viva-<tus-iniciales>
+```
 
----
+### 3. Haz el ejercicio
 
-Las instrucciones completas de prework (checklist de entorno + priming) están en el Módulo 2 del asíncrono del curso.
+Tu archivo va en `docs/spec-viva/`, con los requisitos de la Parte A y las tres listas de la Parte B.
+
+### 4. Rellena `prompts.md`
+
+Está en la raíz, con la plantilla puesta. **Es obligatorio y es la mitad de lo que se revisa**: lo que se mira no es solo tu resultado, es cómo lo pediste. Un prompt por bloque, con el modelo y la herramienta que usaste, incluidos los que no funcionaron.
+
+### 5. Abre el pull request
+
+Contra este repositorio, no contra tu fork. Con tu rama empujada, GitHub te ofrece el botón arriba.
+
+```bash
+git add docs/spec-viva prompts.md
+git commit -m "spec viva: <la mitad que elegiste> + prompts"
+git push -u origin spec-viva-<tus-iniciales>
+```
+
+## El plazo
+
+**Antes del directo.** Lo que llegue a tiempo recibe feedback de tu TA antes de la sesión, que es el momento en que te sirve. Lo que llegue después **se marca como recibido pero no se revisa**: el feedback existe para que llegues al directo sabiendo dónde fallaste, y después de la sesión ya no puede hacer eso.
+
+## Antes de conectarte, comprueba
+
+- [ ] Estás en tu **fork**, en tu rama, y `git push` funciona.
+- [ ] El proyecto levanta entero y puedes iniciar sesión en la interfaz.
+- [ ] Existe tu archivo en `docs/spec-viva/`, con la spec y las tres listas.
+- [ ] `prompts.md` está relleno, con modelo y herramienta en cada bloque.
+- [ ] El pull request está abierto.
+
+> Las instrucciones completas de prework (instalar OpenSpec, sandbox y priming) están en el asíncrono del curso.
